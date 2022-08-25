@@ -1,0 +1,3 @@
+C:/Users/timpr/OneDrive/Studienunterlagen/101_T2000/coffeeOS/cmake-build-debug/CMakeFiles/coffeeOS.dir
+C:/Users/timpr/OneDrive/Studienunterlagen/101_T2000/coffeeOS/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/timpr/OneDrive/Studienunterlagen/101_T2000/coffeeOS/cmake-build-debug/CMakeFiles/rebuild_cache.dir

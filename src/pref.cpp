@@ -18,6 +18,8 @@ typedef struct {
 
 Preferences pref;
 
+
+
 /*  Diese Funktion speichert das aktuelle Struct-Array in ein
  *  Preference-Register in Form von reinen Bytes,
  *  die dann beim Auslessen wieder in Form des typedef's gebracht werden müssen.
@@ -90,9 +92,6 @@ int8_t getElements(user_t* user, uint8_t* UID) {
 		
 	return elementCount;
 }
-
-
-
 
 // put your setup code here, to run once:
 void setup() {
