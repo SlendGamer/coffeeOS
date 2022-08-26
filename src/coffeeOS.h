@@ -1,15 +1,16 @@
 #pragma once
 
 //#include "cli.h" // command-line-interface library
-#include "const.h"
+#include "my_config.h"
 #include "config.h"
 #include "product.h"
 #include "user.h"
 #include "transaction.h"
+#include "menu.h"
 
 #include <Arduino.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
+#include <cstring>
 
 #include <Wire.h>
 #include <WiFi.h>
@@ -21,7 +22,6 @@
 #include <Adafruit_PN532.h>
 
 #define DEBUG
-//#define HOME
 
 // Variablen deklarieren/ initialisieren
 unsigned char menuID = 0;
@@ -35,13 +35,8 @@ float balance;
 
 static uint8_t ucBackBuffer[1024];
 
-#ifndef HOME
 const char *initial_ssid = "FRITZ!Box 7490";
 const char *initial_password = "+Feuerwehr-dbkt1";
-#else
-const char *initial_ssid = "Feldfunkstation 1";
-const char *initial_password = "52837754105258160424";
-#endif
 
 String header;
 
@@ -53,7 +48,7 @@ typedef struct
 } user_t;
 
 user_t *user;
-TaskHandle_t Task1;
+//TaskHandle_t Task1;
 
 // Menu-Items
 char *menu0[] = {                  // Artikel-IDs
@@ -75,7 +70,9 @@ char *menu0[] = {                  // Artikel-IDs
     (char *)"Gruener   Tee",       // 15
     (char *)"Kraeuter- tee",       // 16
     (char *)"Fruechte- tee",       // 17
-    (char *)"Settings", NULL};
+    (char *)"Settings",
+    nullptr
+};
 
 // Preisliste
 float prices[] = {
@@ -96,15 +93,8 @@ float prices[] = {
     4.200,
     4.200,
     4.200,
-    4.200};
-
-// Settings-Menu
-char *menu1[] = {
-    (char *)"<<<<",
-    (char *)"User-Info",
-    (char *)"User-Reset",
-    (char *)"Netzwerk-Info",
-    (char *)"Helligkeit", NULL};
+    4.200
+};
 
 // neue Instantzen erzeugen
 Adafruit_PN532 nfc(PN532_IRQ, PN532_RST);
@@ -115,10 +105,6 @@ SIMPLEMENU menu;
 OBDISP obd;
 
 void confirm();
-void saveUsers(user_t *);
-void loadUsers(user_t **);
-int8_t getElements(user_t *, uint8_t *);
-uint8_t centerOffset(char *, uint8_t);
 
 template<typename T>
 int elementCount(T**);
@@ -128,13 +114,10 @@ class Config;
 class User;
 class Transaction;
 class Product;
-class Menu;
-class WLAN;
 
 class CoffeeOS {
 public:
-    Config *config;
-    Menu *menu;
+    Config *config{};
 
     CoffeeOS();
     static CoffeeOS& instance()
@@ -150,19 +133,8 @@ public:
 
     void wlan_init();
     void i2c_init();
-    void display_init();
-    void rotaryEncoder_init();
-    void nfcReader_init();
+    static void display_init();
+    static void rotaryEncoder_init();
+    static void nfcReader_init();
 };
 
-class Menu {
-public:
-
-    void startupScreen();
-};
-
-class WLAN {
-public:
-    String wlan_ssid;
-    String wlan_pass;
-};

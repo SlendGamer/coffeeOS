@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(src)
 
 add_executable(coffeeOS
-        src/binaries.h
+        src/main.cpp
         src/cli.cpp
         src/cli.h
         src/cli_cmd.cpp
@@ -14,6 +14,9 @@ add_executable(coffeeOS
         src/coffeeOS.h
         src/config.cpp
         src/config.h
-        src/const.h
-        src/pref.cpp
-        src/user_db.cpp)
+        src/my_config.h
+        src/menu.cpp
+        src/menu.h
+        src/user.h
+        src/product.h
+        src/transaction.h)

@@ -2,9 +2,16 @@
 
 #include "coffeeOS.h"
 
+void saveUsers(user_t *);
+void loadUsers(user_t **);
+
+int8_t getElements(user_t *, uint8_t *);
+uint8_t centerOffset(char *, uint8_t);
+
 class Config {
 public:
-    WLAN *wlanConfig;
+    String wlan_ssid;
+    String wlan_pass;
     Product **productList;
     User **userList;
 

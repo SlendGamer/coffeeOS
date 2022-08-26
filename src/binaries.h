@@ -157,4 +157,10 @@ const byte animation[] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
- 
+/*uint8_t *pAnim = (uint8_t *) animation;
+	lastMillis = millis();
+	while(millis() - lastMillis <= 5000)
+	{ // play all frames (automatically starts over when it reaches the end)
+	  pAnim = obdPlayAnimFrame(&obd, (uint8_t *)animation, pAnim, sizeof(animation));
+	  delay(20); // simplistic rate control; should manage the variable time per frame
+	}*/

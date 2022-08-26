@@ -1,13 +1,12 @@
 #pragma once
 
+//#define ENABLE_WIFI
+
 #define MY_CONFIG
 
 #ifdef MY_CONFIG
     #define INITIAL_WLAN_SSID "owo-uwu-rawr"
     #define INITIAL_WLAN_PASS "Constant-Frightful-Straining-Lettuce-Sabotage"
-#else
-    #define INITIAL_WLAN_SSID "Your_Network"
-    #define INITIAL_WLAN_PASS "1234"
 #endif
 
 #define OLED_SDA 21
