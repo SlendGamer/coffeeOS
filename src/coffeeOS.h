@@ -1,5 +1,3 @@
-#pragma once
-
 //#include "cli.h" // command-line-interface library
 #include "my_config.h"
 #include "config.h"
@@ -96,13 +94,17 @@ float prices[] = {
     4.200
 };
 
-// neue Instantzen erzeugen
-Adafruit_PN532 nfc(PN532_IRQ, PN532_RST);
-Preferences pref;
+// declare instances of component objects
+// Adafruit_PN532 nfc_reader(PN532_IRQ, PN532_RST);
+
+#ifdef ENABLE_WIFI
 WiFiServer server(80);
+#endif
 ESP32Encoder encoder;
-SIMPLEMENU menu;
+//SIMPLEMENU menu;
 OBDISP obd;
+
+
 
 void confirm();
 
@@ -122,7 +124,7 @@ public:
     CoffeeOS();
     static CoffeeOS& instance()
     {
-        static CoffeeOS& instance();
+        //static CoffeeOS& instance();
         return instance();
     }
 

@@ -11,7 +11,7 @@ char *menu1[] = {
 };
 
 /*! @brief Array of function pointers to the menu functions */
-void (*menu_func[])() {
+void (*menu_func[])(Adafruit_PN532& nfc_reader) {
     &main_menu,
     &first_menu,
     &second_menu,
@@ -19,7 +19,7 @@ void (*menu_func[])() {
 };
 
 /*! @brief This function calls the according menu function based on menu id. */
-void select_menu(unsigned int menu_id) {
+void select_menu(unsigned int menu_id, Adafruit_PN532& nfc_reader) {
     if(menu_id >= elementCount(menu_func)) {
         Serial.println("Return to Main Menu");
         menuID = 0;
@@ -28,7 +28,7 @@ void select_menu(unsigned int menu_id) {
 }
 
 /*! @brief Menu function for the product selection. */
-void main_menu() {
+void main_menu(Adafruit_PN532& nfc_reader) {
     Serial.println("Main Menu");
 
 
@@ -92,7 +92,7 @@ void main_menu() {
 }
 
 /*! @brief Menu function that shows the connection status to the coffee machine. */
-void first_menu() {
+void first_menu(Adafruit_PN532& nfc_reader) {
     Serial.println("1# Coffee Machine Query");
     obdFill(&obd, 0, 1);
 
@@ -101,14 +101,14 @@ void first_menu() {
 }
 
 /*! @brief Menu function that shows status info on product preparation. */
-void second_menu() {
+void second_menu(Adafruit_PN532& nfc_reader) {
     Serial.println("2# Drink in Production");
     delay(500);
     menuID = 0;
 }
 
 /*! @brief Menu function that shows settings. */
-void settings_menu() {
+void settings_menu(Adafruit_PN532& nfc_reader) {
     Serial.println("Settings Menu");
 
     index = 0;
@@ -166,12 +166,12 @@ void settings_menu() {
                     obdFill(&obd, 0, 1);
                     obdWriteString(&obd, 0, 0, 0, (char *) "Waiting for Card", FONT_6x8, 0, 1);
 
-                    nfc.startPassiveTargetIDDetection(PN532_MIFARE_ISO14443A);
+                    nfc_reader.startPassiveTargetIDDetection(PN532_MIFARE_ISO14443A);
 
                     while (index == 1) {
 
                         if (digitalRead(PN532_IRQ) == LOW) {
-                            success = nfc.readDetectedPassiveTargetID(uid, &uidLength);
+                            success = nfc_reader.readDetectedPassiveTargetID(uid, &uidLength);
                             Serial.println(success ? "Read successful" : "Read failed (not a card?)");
                             if (!success)
                                 break;
@@ -243,10 +243,10 @@ void settings_menu() {
                                         while (digitalRead(ROT_BUTTON) == ROT_BUTTON_PRESS)
                                             if (millis() - lastMillis > 2000) {
                                                 obdWriteString(&obd, 0, 0, 5, "Admin Confirmation", FONT_6x8, 0, 1);
-                                                nfc.startPassiveTargetIDDetection(PN532_MIFARE_ISO14443A);
+                                                nfc_reader.startPassiveTargetIDDetection(PN532_MIFARE_ISO14443A);
 
                                                 while (digitalRead(PN532_IRQ));
-                                                success = nfc.readDetectedPassiveTargetID(uid, &uidLength);
+                                                success = nfc_reader.readDetectedPassiveTargetID(uid, &uidLength);
                                                 if (!success)
                                                     break;
 
@@ -342,7 +342,7 @@ void settings_menu() {
 }
 
 /*! @brief Function to set a screensaver to the display. */
-void screensaver()
+void screensaver(Adafruit_PN532& nfc_reader)
 {
     Serial.println("Entering Screen-Saver");
 

@@ -54,9 +54,10 @@ void CoffeeOS::display_init() {
 }
 
 void CoffeeOS::nfcReader_init() {
-    nfc.begin(PN532_SDA, PN532_SCL);
+    Adafruit_PN532 nfc_reader(PN532_IRQ, PN532_RST);
+    nfc_reader.begin();
 
-    uint32_t versiondata = nfc.getFirmwareVersion();
+    uint32_t versiondata = nfc_reader.getFirmwareVersion();
     if (!versiondata) {
         Serial.println("PN532 not found!");
         obdWriteString(&obd, 0, 0, 2, (char *) "PN532 not found!", FONT_8x8, 0, 1);
@@ -128,7 +129,7 @@ void CoffeeOS::loop() {
 
 	// loadUsers(&user);
 
-    select_menu(menuID);
+    select_menu(menuID, nfc_reader);
 }
 
 void webServerCode(void *parameter)

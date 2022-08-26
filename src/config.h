@@ -33,7 +33,4 @@ public:
     uint8_t rotaryEnc_clk;
     uint8_t rotaryEnc_btn;
     bool rotaryEnc_press;
-
-    void export();
-    void import();
 };
