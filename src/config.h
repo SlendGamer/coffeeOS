@@ -1,36 +1,30 @@
 #pragma once
 
-#include "coffeeOS.h"
+#define MY_CONFIG
 
-void saveUsers(user_t *);
-void loadUsers(user_t **);
+#ifdef MY_CONFIG
+    #define INITIAL_WLAN_SSID "owo-uwu-rawr"
+    #define INITIAL_WLAN_PASS "Constant-Frightful-Straining-Lettuce-Sabotage"
+#endif
 
-int8_t getElements(user_t *, uint8_t *);
-uint8_t centerOffset(char *, uint8_t);
+#define OLED_SDA 21
+#define OLED_SCL 22
 
-class Config {
-public:
-    String wlan_ssid;
-    String wlan_pass;
-    Product **productList;
-    User **userList;
+#define PN532_SDA 16
+#define PN532_SCL 17
+#define PN532_IRQ 5
+#define PN532_RST 18
 
-    /* OLED-Config */
-    uint8_t oled_sda; // OLED SDA-pin (serial data)
-    uint8_t oled_scl; // OLED SCL-pin (serial clock)
-    uint8_t oled_addr; // OLED I2C-Bus-Address
-    bool flip180Vert; // flip contents of OLED vertically
-    bool oled_invert; // invert pixels of OLED
-    bool oled_useHWi2c; // use Hardware- or Software-I2C
+#define ROT_CLK 32
+#define ROT_DT 35
+#define ROT_BUTTON 34
+#define ROT_BUTTON_PRESS LOW
 
-    /* RFID-Config */
-    uint8_t rfid_sda;
-    uint8_t rfid_scl;
-    uint8_t rfid_irq;
-    uint8_t rfid_rst;
+#define RESET_PIN -1
+#define OLED_ADDR 0x3C
+#define FLIP180 0
+#define INVERT 0
+#define USE_HW_I2C 0
 
-    /* Rotary-Encoder-Config */
-    uint8_t rotaryEnc_clk;
-    uint8_t rotaryEnc_btn;
-    bool rotaryEnc_press;
-};
+#define MAX_USERS 20 // TODO delete this later if not needed
+#define ARTICLES 18 // TODO delete this later if not needed

@@ -1,180 +1,114 @@
 
+// project includes
 #include "coffeeOS.h"
+#include "config.h"
+#include "product.h"
+#include "stringhelper.h"
 
-CoffeeOS::CoffeeOS() = default;
+// extern includes
+#include <Arduino.h>
+#include <Adafruit_PN532.h>
+#include <ESP32Encoder.h>
+#include <chrono>
+#include <unordered_map>
 
-void loadUsers() {
-    user = (user_t *)calloc(1, sizeof(user_t));
-    loadUsers(&user);
-    for (uint8_t i = 0; i < getElements(user, NULL); i++)
-    {
-        Serial.printf("Name: %s\n", user[i].c_name);
-        Serial.print("UID: ");
-        for (uint8_t c = 0; c < sizeof(user[i].cardUID); c++)
-        {
-            Serial.printf(" %d ", user[i].cardUID[c]);
-        }
-        Serial.printf("\n");
-    }
-    Serial.printf("\n");
-}
-
+bool reset = true;
 
 /*! @brief This function initializes the rotary encoder.
  */
-void CoffeeOS::rotaryEncoder_init() {
+void CoffeeOS::rotary_encoder_init() {
     pinMode(ROT_BUTTON, INPUT_PULLUP);
     pinMode(ROT_CLK, INPUT);
     pinMode(ROT_DT, INPUT);
 
     ESP32Encoder::useInternalWeakPullResistors = UP;
-    encoder.attachFullQuad(ROT_CLK, ROT_DT);
-    encoder.clearCount();
-    encoder.pauseCount();
-}
-
-void startUpScreen() {
-    obdFill(&obd, 0, 1);
-    obdWriteString(&obd, 0, 0, 1, (char *)"ESP32 - ", FONT_16x16, 0, 1);
-    obdWriteString(&obd, 0, 0, 3, (char *)"Coffee- ", FONT_16x16, 0, 1);
-    obdWriteString(&obd, 0, 0, 5, (char *)"inator  ", FONT_16x16, 0, 1);
-    delay(2000);
+    my_encoder.attachFullQuad(ROT_CLK, ROT_DT);
+    my_encoder.clearCount();
+    my_encoder.pauseCount();
 }
 
 void CoffeeOS::display_init() {
     char *msgs[] = {(char *)"SSD1306 @ 0x3C", (char *)"SSD1306 @ 0x3D", (char *)"SH1106 @ 0x3C", (char *)"SH1106 @ 0x3D"};
 
-    int checkDisplay = obdI2CInit(&obd, OLED_128x64, OLED_ADDR, FLIP180, INVERT, USE_HW_I2C, OLED_SDA, OLED_SCL, RESET_PIN, 800000L);
-    obdSetContrast(&obd, brightness);
-    obdSetBackBuffer(&obd, ucBackBuffer);
-    obdSetTextWrap(&obd, 1);
+    int checkDisplay = obdI2CInit(&oled_display, OLED_128x64, -1, 0, 0, 1, -1, -1, -1, 800000L);
+    obdSetContrast(&oled_display, brightness_t);
+    obdSetBackBuffer(&oled_display, ucBuffer);
+    obdSetTextWrap(&oled_display, 1);
 
-    obdFill(&obd, 0, 1);
-    obdWriteString(&obd, 0, 0, 1, msgs[checkDisplay], FONT_8x8, 0, 1);
+    obdFill(&oled_display, 0, 1);
+    obdWriteString(&oled_display, 0, 0, 1*8, msgs[checkDisplay], FONT_8x8, 0, 1);
+    delay(4000);
+    obdFill(&oled_display, 0, 1);
 }
 
-void CoffeeOS::nfcReader_init() {
-    Adafruit_PN532 nfc_reader(PN532_IRQ, PN532_RST);
-    nfc_reader.begin();
+void CoffeeOS::nfc_reader_init() {
+    Adafruit_PN532 reader = CoffeeOS::instance().my_nfc_reader;
+    reader.begin();
 
-    uint32_t versiondata = nfc_reader.getFirmwareVersion();
+    uint32_t versiondata = reader.getFirmwareVersion();
     if (!versiondata) {
-        Serial.println("PN532 not found!");
-        obdWriteString(&obd, 0, 0, 2, (char *) "PN532 not found!", FONT_8x8, 0, 1);
+        DEBUG_PRINTLN("PN532 not found!");
+        obdWriteString(&oled_display, 0, 0, 2*8, (char *) "PN532 not found!", FONT_6x8, 0, 1);
         delay(2000);
+        return;
     }
 
-    Serial.println("PN532 found!");
-    obdWriteString(&obd, 0, 0, 2, (char *)"PN532 init", FONT_8x8, 0, 1);
+    DEBUG_PRINTLN("PN532 found");
+    obdWriteString(&oled_display, 0, 0, 2*8, (char *)"PN532 init", FONT_6x8, 0, 1);
 
-    nfc.setPassiveActivationRetries(0xFF); // set maximum retries
-    nfc.SAMConfig();
-    Serial.println("PN532 configured");
-    obdWriteString(&obd, 0, 0, 3, (char *)"PN532 config", FONT_8x8, 0, 1);
+    reader.setPassiveActivationRetries(0xFF); // set maximum retries
+    reader.SAMConfig();
+    DEBUG_PRINTLN("PN532 configured");
+    obdWriteString(&oled_display, 0, 0, 3*8, (char *)"PN532 config", FONT_6x8, 0, 1);
 }
 
-#ifdef ENABLE_WIFI
-void wifi_init() {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(initial_ssid, initial_password);
-    Serial.print("Connecting to WiFi.");
-    obdWriteString(&obd, 0, 0, 4, (char *)"WiFi connect", FONT_8x8, 0, 1);
-    count = 0;
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print('.');
-        obdWriteString(&obd, 0, count * 8, 5, (char *)".", FONT_8x8, 0, 1);
-        count++;
-        delay(500);
-        if (millis() - lastMillis == 10000)
-            ESP.restart();
-        lastMillis = millis();
-    }
-
-    IPAddress ip = WiFi.localIP();
-    Serial.printf("\nWifi connected!\nIP address: %d.%d.%d.%d\n\n", ip[0], ip[1], ip[2], ip[3]);
-
-    server.begin();
+void CoffeeOS::boot_screen() {
+    obdFill(&oled_display, 0, 1);
+    obdWriteString(&oled_display, 0, 10, 2*8, (char *)"ESP32 - ", FONT_8x8, 0, 1);
+    obdWriteString(&oled_display, 0, 10, 4*8, (char *)"Coffee - ", FONT_8x8, 0, 1);
+    obdWriteString(&oled_display, 0, 10, 6*8, (char *)"inator  ", FONT_8x8, 0, 1);
 }
-#endif
 
 void CoffeeOS::setup() {
 
-#ifdef DEBUG
-	Serial.begin(115200);
-#endif
+    DEBUG_SERIAL_BEGIN(115200);
 
-    loadUsers(); // load user list
-    rotaryEncoder_init(); // initialise rotary encoder
-	display_init(); // initialise display
-    nfcReader_init(); // initialise nfc reader
+    rotary_encoder_init();
+	display_init();
+    nfc_reader_init();
 
-#ifdef ENABLE_WIFI
-    wifi_init(); // initialise wifi connection
-#endif
+	boot_screen();
 
-	// StartupScreen
-	startUpScreen();
+    mySaver.saver_init();
+    myMenu.setup();
+    myManager.init();
+
+    user u = myManager.get_user_list().at(0);
+    Serial.print(("User: " + u.firstName + "; To pay: " + std::to_string(u.get_amount())).c_str());
+
 }
 
 void CoffeeOS::loop() {
-	int8_t index;
-	int8_t userIndex;
-	int8_t prevIndex = -1;
-	uint8_t len;
+    std::string prev_prod_name = myMenu.getCurrentProduct();
+    myMenu.onRotateEvent();
 
-	uint8_t success;
-	uint8_t uid[] = {0, 0, 0, 0, 0, 0, 0}; // Buffer to store the returned UID
-	uint8_t uidLength;					   // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+    if ((std::time(nullptr) - myMenu.getTimeStamp()) > 10) {
+        if (reset) return; // check if start up was already drawn
 
-	// loadUsers(&user);
+        myMenu.exitMenu();
+        boot_screen();
 
-    select_menu(menuID, nfc_reader);
+        reset = true;
+    } else {
+
+        std::string curr_prod_name = myMenu.getCurrentProduct();
+        if (prev_prod_name == curr_prod_name) return; // check if current name was already drawn
+
+        int xShift = (15 - strlen(curr_prod_name.c_str()));
+        obdFill(&oled_display, 0, 1);
+        obdWriteString(&oled_display, 0, 8*(xShift/2), 4*8, (char *)curr_prod_name.c_str(), FONT_8x8, 0, 1);
+
+        reset = false;
+    }
 }
 
-void webServerCode(void *parameter)
-{
-	for (;;)
-	{
-		WiFiClient client = server.available();
-
-		if (client)
-		{
-			Serial.println("New Client");
-			String currentLine = "";
-
-			while (client.connected())
-			{
-				if (client.available())
-				{
-					char c = client.read();
-					Serial.print(c);
-					header += c;
-
-					if (currentLine.length() == 0)
-					{
-						client.println("HTTP/1.1 200 OK");
-						client.println("Content-type:text/html");
-						client.println("Connection: close");
-						client.println();
-					}
-					vTaskDelay(1);
-					yield();
-				}
-			}
-		}
-	}
-}
-
-// counting elements in arrays
-template <typename T>
-int elementCount(T **arrayPtr) { return (sizeof(*arrayPtr) / sizeof(**arrayPtr)); }
-
-
-// Interrupt-Routine für Button-Press
-void confirm() { pressConfirm = true; }
-
-uint8_t centerOffset(char *textElement, uint8_t fontWidth)
-{
-	return (128 - (strlen(textElement) * fontWidth)) / 2;
-}
