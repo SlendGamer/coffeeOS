@@ -8,10 +8,10 @@
 class menu {
 public:
 
-    void setup();
+    void init();
     void exitMenu();
 
-    void onRotateEvent();
+    void on_encoder_event();
 
     std::string getCurrentProduct() const;
 
@@ -28,7 +28,7 @@ private:
     bool select_mode;            // true when user is selecting product (for 10s)
     bool clicked;                // true when user has selected product (for 10s)
 
-    void onLeftEvent();
-    void onRightEvent();
-    void onClickEvent();
+    void on_left_rotation();
+    void on_right_rotation();
+    void on_click();
 };

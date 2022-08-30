@@ -4,7 +4,7 @@
 
 class saver {
 public:
-    void saver_init();
+    void init();
 
     void saveUser(int, double);
     void saveAllUser();

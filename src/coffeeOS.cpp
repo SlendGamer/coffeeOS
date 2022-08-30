@@ -79,29 +79,32 @@ void CoffeeOS::setup() {
 
 	boot_screen();
 
-    mySaver.saver_init();
-    myMenu.setup();
-    myManager.init();
+    my_saver.init();
+    my_menu.init();
+    my_manager.init();
 
-    user u = myManager.get_user_list().at(0);
-    Serial.print(("User: " + u.firstName + "; To pay: " + std::to_string(u.get_amount())).c_str());
+    Serial.println(my_manager.serialize_users().c_str());
+
+    user u = my_manager.get_user_list().at(0);
+    Serial.println(("User: " + u.firstName + "; To pay: " + std::to_string(u.get_amount())).c_str());
 
 }
 
 void CoffeeOS::loop() {
-    std::string prev_prod_name = myMenu.getCurrentProduct();
-    myMenu.onRotateEvent();
+    std::string prev_prod_name = my_menu.getCurrentProduct();
+    my_menu.on_encoder_event();
 
-    if ((std::time(nullptr) - myMenu.getTimeStamp()) > 10) {
+    if ((std::time(nullptr) - my_menu.getTimeStamp()) > 10) {
         if (reset) return; // check if start up was already drawn
 
-        myMenu.exitMenu();
+        my_menu.exitMenu();
         boot_screen();
 
         reset = true;
-    } else {
+    } 
+    else {
 
-        std::string curr_prod_name = myMenu.getCurrentProduct();
+        std::string curr_prod_name = my_menu.getCurrentProduct();
         if (prev_prod_name == curr_prod_name) return; // check if current name was already drawn
 
         int xShift = (15 - strlen(curr_prod_name.c_str()));

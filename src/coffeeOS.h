@@ -37,9 +37,9 @@ public:
     OBDISP oled_display{};
 
     // firmware modules instances
-    menu myMenu;
-    saver mySaver;
-    manager myManager;
+    menu my_menu;
+    saver my_saver;
+    manager my_manager;
 
     void setup(); // gets executed once at boot
     void loop(); // gets repeatedly executed after setup

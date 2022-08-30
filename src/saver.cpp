@@ -7,7 +7,7 @@
 #include <cmath>
 #include <EEPROM.h>
 
-void saver::saver_init() {
+void saver::init() {
     EEPROM.begin(EEPROM_SIZE);
 }
 
@@ -29,7 +29,7 @@ void saver::clearFlashMem() {
 
 void saver::saveAllUser() {
     clearFlashMem();
-    std::unordered_map<int, user> ul = CoffeeOS::instance().myManager.get_user_list();
+    std::unordered_map<int, user> ul = CoffeeOS::instance().my_manager.get_user_list();
     for (int i = 0; i < ul.size(); i++) {
         saveUser(ul.at(i).identifier, ul.at(i).get_amount());
     }
@@ -53,9 +53,9 @@ double saver::get_user_amount(int id) {
 }
 
 void saver::setAllUserAmount() {
-    std::unordered_map<int, user> ul = CoffeeOS::instance().myManager.get_user_list();
+    std::unordered_map<int, user> ul = CoffeeOS::instance().my_manager.get_user_list();
     for (int i = 0; i < ul.size(); i++) {
-        CoffeeOS::instance().myManager.set_user_amount(i, get_user_amount(i));
+        CoffeeOS::instance().my_manager.set_user_amount(i, get_user_amount(i));
     }
 }
 

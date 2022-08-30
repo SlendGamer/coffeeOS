@@ -2,6 +2,11 @@
 
 #include <string>
 
+#define ITEM_DELIMITER     ";"
+#define ITEM_DELIMITER_LENGTH 1
+#define ELEMENT_DELIMITER   "#"
+#define ELEMENT_DELIMITER_LENGTH 1
+
 class user {
 public:
     // public member variables
@@ -10,6 +15,7 @@ public:
     std::string firstName;
     std::string lastName;
 
+    user();
     user(int, std::string, std::string, double); // constructor
 
     void add_amount(double);
@@ -25,5 +31,4 @@ private:
 
     double amount = 0;
     void on_data_change();
-
 };

@@ -2,7 +2,13 @@
 #include "coffeeOS.h"
 
 #include "user.h"
-#include "stringhelper.h"
+
+user::user() {
+    this->identifier = 0;
+    this->firstName = "";
+    this->lastName = "";
+    this->amount = 0;
+}
 
 user::user(int identifier, std::string firstName, std::string lastName, double amount) {
     this->identifier = identifier;
@@ -19,14 +25,13 @@ void user::print_to_oled() const {
     obdWriteString(&oled, 0, 0, 2*8, (char* ) ("Last-Name: " + this->lastName).c_str(), FONT_8x8, 0, 1);
     obdWriteString(&oled, 0, 0, 3*8, (char* ) ("Amount: " + std::to_string(this->amount)).c_str(), FONT_8x8, 0, 1);
 }
-// Serialize format:
-// u:id;firstname;lastname;amount
+// serialize format: ID;FIRSTNAME;LASTNAME;AMOUNT
 std::string user::serialize() const {
-    std::string user_string = "u:";
-    user_string = user_string + std::to_string(identifier) + ";";
-    user_string = user_string + firstName + ";";
-    user_string = user_string + lastName + ";";
-    user_string = user_string + std::to_string(amount);
+    std::string user_string;
+    //user_string += std::to_string(identifier) + ITEM_DELIMITER;
+    user_string += firstName + ITEM_DELIMITER;
+    user_string += lastName + ITEM_DELIMITER;
+    user_string += std::to_string(amount);
     return user_string;
 }
 
