@@ -1,3 +1,9 @@
+/*!
+    @file     manager.cpp
+    @author   Tim Prüß
+
+    Contains initilizations of member functions.
+*/
 
 // project includes 
 #include "coffeeOS.h"
@@ -13,6 +19,9 @@
 #include <unordered_map>
 #include <string>
 
+/*!
+    @brief  Initializes an instance of class menu. Loads users and products.
+*/
 void manager::init() {
     OBDISP& oled = CoffeeOS::instance().oled_display;
 
@@ -30,6 +39,10 @@ void manager::init() {
     delay(1000);
 }
 
+/*!
+    @brief  Initializes the SPIF file system (SPIFFS) and formats it if necessary.
+    @return True if successful, false if it failed to mount/format the file system
+*/
 bool manager::file_system_init() const {
     DEBUG_PRINTLN("file_system_init(): initiating SPI");
     SPI.begin();
@@ -46,6 +59,10 @@ bool manager::file_system_init() const {
     return init_success;
 }
 
+/*!
+    @brief  Serializes all users from the user_list to a single string.
+    @return Serialized users string
+*/
 std::string manager::serialize_users() const {
     std::string serialized; // string to construct the whole serialized user list
 
@@ -58,6 +75,10 @@ std::string manager::serialize_users() const {
     return serialized;
 }
 
+/*!
+    @brief  Serializes all products from the product_list to a single string.
+    @return Serialized products string
+*/
 std::string manager::serialize_products() const {
     std::string serialized; // string to construct the whole serialized user list
 
@@ -70,6 +91,9 @@ std::string manager::serialize_products() const {
     return serialized;
 }
 
+/*!
+    @brief  Saves all users from the user_list to the SPIFFS.
+*/
 void manager::save_users() const {
     int bytes_written;
     File user_file;
@@ -94,7 +118,9 @@ void manager::save_users() const {
 
     user_file.close();
 }
-
+/*!
+    @brief  Saves all products from the product_list to the SPIFFS.
+*/
 void manager::save_products() const {
     int bytes_written;
     File products_file;
@@ -121,6 +147,9 @@ void manager::save_products() const {
     products_file.close();
 }
 
+/*!
+    @brief  Loads all users into the user_list from the SPIFFS. 
+*/
 void manager::load_users() {
     File user_file = SPIFFS.open("/user_config", "r"); // read from user config
     int file_size = user_file.size();
@@ -181,6 +210,9 @@ void manager::load_users() {
     }
 }
 
+/*!
+    @brief  Loads default users (e.g. if SPIFFS failed). 
+*/
 void manager::load_default_users() {
     user_list.insert({0, user(0, "Tim", "Pruess", 0, 0)});
     user_list.insert({1, user(1, "Olaf", "Assmann", 0, 0)});
@@ -191,10 +223,16 @@ void manager::load_default_users() {
     DEBUG_PRINTLN("load_default_users(): loading complete");
 }
 
+/*!
+    @brief  Loads all products into the product_list from the SPIFFS. 
+*/
 void manager::load_products() {
     load_default_products();
 }
 
+/*!
+    @brief  Loads default products (e.g. if SPIFFS failed). 
+*/
 void manager::load_default_products() {
     product_list.insert({0, product(0, "Kaffee", 1.0)});
     product_list.insert({1, product(1, "Ristretto", 1.5)});
@@ -218,18 +256,119 @@ void manager::load_default_products() {
     // product_list.insert({6, product(6, "Cappuccino Italiano", 1.75)});
 }
 
+/*!
+    @brief  Loads all users from the SPIFFS.
+*/
 void manager::add_user_amount(int id, double amount) {
     user_list.at(id).add_amount(amount);
 }
 
+/*!
+    @brief  Prints all users to serial monitor.
+*/
 void manager::serial_print_users() const {
     for (auto it = user_list.begin(), end = user_list.end(); it != end; it++) {
         it->second.serial_print();
     }
 }
 
+/*!
+    @brief  Prints all products to serial monitor.
+*/
 void manager::serial_print_products() const {
     for (auto it = product_list.begin(), end = product_list.end(); it != end; it++) {
         it->second.serial_print();
     }
+}
+
+/*!
+    @brief  Gets the nfc card_id and compares it with the card_id in the user_list.
+    @return User id of the corresponding user matching with the card_id. Return -1 when no card is detected.
+*/
+int manager::get_user_id_from_nfc() {
+    int user = -1;
+
+    // check for nfc card
+    if (reader_disabled) {
+        if (millis() - time_last_card_read > DELAY_BETWEEN_CARDS) {
+            reader_disabled = false;
+            start_listening_to_nfc();
+        }
+
+    } else {
+        irqCurr = digitalRead(PN532_IRQ);
+
+        // when the IRQ is pulled low, the reader has passively read a card
+        if (irqCurr == LOW && irqPrev == HIGH) {  
+            
+            // find user card id matching with the read card id
+            uint32_t card_id = get_card_id();
+            for (int i = 0; i < user_list.size(); i++) {
+                if (user_list.at(i).card_id == card_id) user = i;
+            }
+            
+        }
+
+        irqPrev = irqCurr;
+    }
+
+    return user;
+}
+
+/*!
+    @brief  Activates the passive detection of nfc tags by the PN532 reader.
+*/
+void manager::start_listening_to_nfc() {
+    Adafruit_PN532& nfc = CoffeeOS::instance().my_nfc_reader;
+
+    // Reset our IRQ indicators
+    irqPrev = irqCurr = HIGH;
+
+    Serial.println("Waiting for an ISO14443A Card ...");
+    nfc.startPassiveTargetIDDetection(PN532_MIFARE_ISO14443A);
+}
+
+/*!
+    @brief  Handles event that a card is detected by the PN532 reader and convert its array-like uid into a number for easier handling.
+    @return Integer card_id
+*/
+uint32_t manager::get_card_id() {
+    Adafruit_PN532& nfc = CoffeeOS::instance().my_nfc_reader;
+    
+    uint8_t success = false;
+    uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
+    uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+    uint32_t card_id = 0;
+
+    // read card
+    success = nfc.readDetectedPassiveTargetID(uid, &uidLength);
+    Serial.println(success ? "Read successful" : "Read failed (not a card?)");
+
+    if (success) {
+        // display some basic information about the card
+        Serial.println("Found an ISO14443A card");
+        Serial.print("  UID Length: ");Serial.print(uidLength, DEC);Serial.println(" bytes");
+        Serial.print("  UID Value: ");
+        nfc.PrintHex(uid, uidLength);
+        
+        // convert array uid to integer value for easier handling
+        if (uidLength == 4) { 
+            card_id = uid[0];
+            card_id <<= 8;
+            card_id |= uid[1];
+            card_id <<= 8;
+            card_id |= uid[2];
+            card_id <<= 8;
+            card_id |= uid[3]; 
+            Serial.print("Mifare Classic card #");
+            Serial.println(card_id);
+        }
+
+        // set when the card was last read
+        time_last_card_read = millis();
+    }
+
+    // The reader will be enabled again after DELAY_BETWEEN_CARDS ms will pass.
+    reader_disabled = true;
+    return card_id;
 }

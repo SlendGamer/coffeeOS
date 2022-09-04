@@ -1,12 +1,27 @@
+/*!
+    @file     wifi_handler.cpp
+    @author   Tim Prüß
 
+    Contains initilizations of member functions.
+*/
+
+// project includes
 #include "coffeeOS.h"
 #include "wifi_handler.h"
 
+/*!
+    @brief Constructs an object of class wifi_handler with given parameters.
+    @param wifi_ssid SSID of the wireless LAN to connect to
+    @param wifi_password Pre-shared key (password) of the wireless LAN to connect to
+*/
 wifi_handler::wifi_handler(const char* wifi_ssid, const char* wifi_password) {
     this->ssid = wifi_ssid;
     this->password = wifi_password;
 }
 
+/*!
+    @brief  Initializes an instance of class wifi_handler.
+*/
 void wifi_handler::init() {
     OBDISP& oled = CoffeeOS::instance().oled_display;
 
@@ -34,6 +49,9 @@ void wifi_handler::init() {
     server.begin();
 }
 
+/*!
+    @brief  Handles the connection of a wifi client to manage the web interface.
+*/
 void wifi_handler::wifi_client() {
     client = server.available();   // listen for incoming clients
 
@@ -96,6 +114,10 @@ void wifi_handler::wifi_client() {
     }
 }
 
+/*!
+    @brief  Parses an HTTP request and evaluates which function to execute based on the request.
+    @param request HTTP request
+*/
 void wifi_handler::parse_http_request(String request) {
     if (request.endsWith("GET /serial_print_users")) CoffeeOS::instance().my_manager.serial_print_users();
     if (request.endsWith("GET /save_users")) CoffeeOS::instance().my_manager.save_users();
@@ -110,6 +132,10 @@ void wifi_handler::parse_http_request(String request) {
     if (request.endsWith("GET /restart")) CoffeeOS::instance().restart();
 }
 
+/*!
+    @brief  Handles the connection of a wifi client to manage the web interface.
+    @param message TCP message to send
+*/
 void wifi_handler::tcp_send(const char* message) {
   Serial.printf("connecting to %s %d \n", tcp_host, tcp_host_port);
 

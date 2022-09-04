@@ -1,0 +1,7 @@
+.pio/
+.idea/
+.vscode/
+!.vscode/settings.json
+cmake-build-debug/
+doc/html
+doc/latex

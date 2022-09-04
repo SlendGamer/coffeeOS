@@ -1,8 +1,13 @@
-/* CoffeeOS
+/**************************************************************************
  * Created on May 23 2022
- *
  * Copyright (c) 2022 by Tim Pruess
- */
+ **************************************************************************/
+/*!
+    @file     coffeeOS.cpp
+    @author   Tim Prüß
+
+    Contains initilizations of member functions.
+*/
 
 // project includes
 #include "coffeeOS.h"
@@ -23,6 +28,12 @@
 
 bool reset = true;
 
+/*!
+    @brief  Gets executed once at boot to run necessary setup functions.
+
+    Contains initilization functions of class CoffeeOS and other classes that execute
+    necessary init functions (e.g. Serial.begin() for serial communication with a computer).
+*/
 void CoffeeOS::setup() {
     DEBUG_SERIAL_BEGIN(115200);
     while(!Serial) delay(10); // wait for serial connection
@@ -40,6 +51,10 @@ void CoffeeOS::setup() {
     boot_screen();
 }
 
+/*!
+    @brief  Gets executed repeatedly after the setup function. Contains the actual runtime code.
+
+*/
 void CoffeeOS::loop() {
     my_wifi.wifi_client();
 
@@ -66,8 +81,9 @@ void CoffeeOS::loop() {
     }
 }
 
-/*! @brief This function initializes the rotary encoder.
- */
+/*!
+    @brief  Sets up the rotary encoder for user input.
+*/
 void CoffeeOS::rotary_encoder_init() {
     pinMode(ROT_BUTTON, INPUT_PULLUP);
     pinMode(ROT_CLK, INPUT);
@@ -86,6 +102,9 @@ void CoffeeOS::rotary_encoder_init() {
     my_encoder.pauseCount();
 }
 
+/*!
+    @brief  Initializes the OLED display (using I2C) for displaying of user-relevant information and instructions.
+*/
 void CoffeeOS::display_init() {
     char *msgs[] = {(char *)"SSD1306 @ 0x3C", (char *)"SSD1306 @ 0x3D", (char *)"SH1106 @ 0x3C", (char *)"SH1106 @ 0x3D"};
 
@@ -105,6 +124,9 @@ void CoffeeOS::display_init() {
     obdFill(&oled_display, 0, 1);
 }
 
+/*!
+    @brief  Initializes the PN532 nfc reader (using I2C).
+*/
 void CoffeeOS::nfc_reader_init() {
 
     my_nfc_reader.begin();
@@ -131,6 +153,9 @@ void CoffeeOS::nfc_reader_init() {
     delay(1000);
 }
 
+/*!
+    @brief  Displays a boot screen with the project name on the OLED-display.
+*/
 void CoffeeOS::boot_screen() {
     obdFill(&oled_display, 0, 1);
     obdWriteString(&oled_display, 0, 1, 1*8, (char *) "ESP32", FONT_12x16, 0, 1);
@@ -138,6 +163,9 @@ void CoffeeOS::boot_screen() {
     obdWriteString(&oled_display, 0, 1, 5*8, (char *) "inator", FONT_12x16, 0, 1);
 }
 
+/*!
+    @brief  Restarts the software of the microcontroller.
+*/
 void CoffeeOS::restart() {
     DEBUG_PRINT("reset(): restarting in 5s...");
     delay(5000);

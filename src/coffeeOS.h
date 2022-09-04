@@ -1,3 +1,10 @@
+/*!
+    @file     coffeeOS.h
+    @author   Tim Prüß
+
+    Contains the declarations of class, members (functions) and pre-processor defines.
+*/
+
 #pragma once
 
 // project includes
@@ -56,39 +63,49 @@
 #   define DEBUG_PRINT(x)           ()
 #endif
 
-// coffeeOS class: microcontroller firmware for the project
+/*!
+    @brief  Main class for the firmware. Contains important setup and loop functions.
+*/
 class CoffeeOS {
 public:
     void setup(); // gets executed once at boot
     void loop(); // gets executed repeatedly after setup
     void restart(); // reset the microcontroller
 
+    /*!
+        @brief Constructs an Object of class CoffeeOS with given parameters.
+        @param reader Instance of class Adafruit_PN532
+        @param wifi Instance of class wifi_handler
+    */
     CoffeeOS(Adafruit_PN532 reader, wifi_handler wifi) : 
         my_nfc_reader(reader),
         my_wifi(wifi) {
     }
 
+    /*!
+    @brief  Initializes a static instance of class CoffeeOS that can be called everywhere in the program.
+    */
     static CoffeeOS& instance() {
         static CoffeeOS instance(Adafruit_PN532(PN532_IRQ, PN532_RST), wifi_handler(INITIAL_WLAN_SSID, INITIAL_WLAN_PASS));
         return instance;
     }
 
     // config variables
-    int brightness_t = 255;
-    uint8_t ucBuffer[1024]{};
+    int brightness_t = 255; /*! Stores brightness (= contrast) of the OLED-display. */
+    uint8_t ucBuffer[1024]{}; /*! Stores image buffer data for the OLED-display. */
 
-    int last_product;
-    int last_user;
+    int last_product; /*! Stores which product was purchased most recent. */
+    int last_user; /*! Stores which user recently purchased something. */ 
 
     // component module instances
-    Adafruit_PN532 my_nfc_reader;
-    ESP32Encoder my_encoder;
-    OBDISP oled_display{};
+    Adafruit_PN532 my_nfc_reader; /*! Object of class Adafruit_PN532 */ 
+    ESP32Encoder my_encoder; /*! Object of class ESP32Encoder */ 
+    OBDISP oled_display{}; /*! Instanace of struct OBDISP */ 
 
     // firmware module instances
-    wifi_handler my_wifi;
-    manager my_manager;
-    menu my_menu;
+    wifi_handler my_wifi; /*! Object of class wifi_handler */ 
+    manager my_manager; /*! Object of class manager */ 
+    menu my_menu; /*! Object of class menu */ 
 
 private:
     void display_init();

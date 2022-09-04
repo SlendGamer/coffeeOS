@@ -1,7 +1,18 @@
+/*!
+    @file     wifi_handler.h
+    @author   Tim Prüß
+
+    Contains the declarations of class and members (functions).
+*/
+
 #pragma once
 
+// extern includes
 #include <WiFi.h>
 
+/*!
+    @brief  Contains all functions for the establishing and managing the wifi connection and web interface.
+*/
 class wifi_handler {
 public:
     wifi_handler(const char*, const char*);
@@ -11,13 +22,13 @@ public:
 
     void tcp_send(const char*);
     
-    WiFiServer server;
-    WiFiClient client;
+    WiFiServer server; /*! Instance of class WiFiServer */
+    WiFiClient client; /*! Instance of class WiFiClient */
 
 private:
-    const char* ssid;
-    const char* password;
+    const char* ssid; /*! Stores the wifi ssid */
+    const char* password; /*! Stores the wifi pre-shared key (password) */
     
-    const char* tcp_host = "192.168.178.1";
-    uint16_t tcp_host_port = 8080;
+    const char* tcp_host = "192.168.178.1"; /*! Stores the adress to send the tcp message to */
+    uint16_t tcp_host_port = 8080; /*! Stores port to connect to when sending the tcp message */
 };
