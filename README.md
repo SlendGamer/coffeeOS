@@ -6,7 +6,7 @@ This project was intentionally created for a project report and is currently lim
 
 # License
 
-Copyright © 2022 Tim Prüß
+Copyright © 2022 Tim Prüß  
 MIT License.
 
 See LICENSE for Details.
