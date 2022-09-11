@@ -53,6 +53,9 @@ public:
     int irqCurr; /*! Current value of the IRQ line of the PN532 that acts like an interrupt for the microcontroller */
     int irqPrev; /*! Previous value of the IRQ line of the PN532 that acts like an interrupt for the microcontroller */
 
+    user** my_users;
+    product** my_products;
+
     std::unordered_map<int, product> product_list; /*! Stores every product and associates each with an identifier */
     std::unordered_map<int, user> user_list; /*! Stores every user and associates each with an identifier */
 
