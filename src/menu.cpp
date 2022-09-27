@@ -105,6 +105,7 @@ void menu::on_click() {
     last_user = CoffeeOS::instance().my_manager.get_user_id_from_nfc();
 
     if (last_user == -1) return;
+    CoffeeOS::instance().my_wifi.cmd_send(last_product);
     CoffeeOS::instance().my_manager.add_user_amount(last_user, price);
 }
 

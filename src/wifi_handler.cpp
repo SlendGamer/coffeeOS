@@ -137,16 +137,20 @@ void wifi_handler::parse_http_request(String request) {
     @param message TCP message to send
 */
 void wifi_handler::tcp_send(const char* message) {
-  Serial.printf("connecting to %s %d \n", tcp_host, tcp_host_port);
+  Serial.printf("tcp_send(): connecting to %s %d \n", tcp_host, tcp_host_port);
 
   if (!client.connect(tcp_host, tcp_host_port)) {
-    Serial.println("connection failed");
+    Serial.println("tcp_send(): connection failed");
     delay(5000);
     return;
   }
-  Serial.println("sending data to server");
+  Serial.println("tcp_send(): sending data to server");
 
   client.printf(message);
-  Serial.println("closing connection");
+  Serial.println("tcp_send(): closing connection");
   client.stop();
+}
+
+void wifi_handler::cmd_send(int product) {
+    tcp_send(cmd_lookup[product]);
 }
